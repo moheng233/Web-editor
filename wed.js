@@ -12,6 +12,11 @@
 
     // add对象
     var add_this;
+    var edit_this;
+    var edit_component;
+
+    var edit_modal;
+    var add_modal;
 
     // template
     var template;
@@ -37,7 +42,11 @@
                 add_this = $(this);
             })
             $('[edit]').off().on('dblclick',function(event){
-                console.log('edit');
+                edit_this = $(this);
+                var component = wed.get.component(edit_this.attr('data-group'),edit_this.attr('data-component'));
+                edit_component = component;
+                wed.edit.update(component);
+                $('#edit_modal').modal();
                 event.stopPropagation();
             })
         },
@@ -60,11 +69,25 @@
             // 对于卡片进行编辑的主对象
             init: function(){
                 wed.edit.create();
-                wed.edit.update();
+                edit_modal.on('click','#save',function(){
+                    var form = edit_modal.find('.modal-body');
+                    edit_component.edit.forEach(function(value){
+                        var eid = value.eid;
+                        value.set(edit_this,form.find('[eid="'+eid+'"]').val());
+                    })
+                    edit_modal.modal('hide');
+                    wed.update();
+                })
             },
-            update: function(){
-                $('[data-node]').off().on('dblclick',function(){
-                    
+            update: function(component){
+                component.edit.forEach(function(value){
+                    var form = edit_modal.find('.modal-body');
+                    form.empty();
+                    switch(value.type){
+                        case 'text':
+                            form.append($('<p>'+ value.name +'</p><input class="form-control" type="text" eid="'+ value.eid + '" value="' + value.get(edit_this) + '"></input>'));
+                            break;
+                    }
                 })
             },
             create: function(){
@@ -92,7 +115,8 @@
                 </template>\
                 ')
 
-                $('body').append($edit_model.html())
+                $('body').append($edit_model.html());
+                edit_modal = $('#edit_modal');
             }
         },
         modal: {

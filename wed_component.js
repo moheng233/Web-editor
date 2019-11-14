@@ -14,6 +14,19 @@ $(function(){
                     <add></div>\
                 </div>\
             </div>',
+        edit:[
+            {
+                eid: 'card_header_text',
+                name: '卡片头部标题',
+                type: 'text',
+                get: function(component){
+                    return $.trim(component.find('.card-header').html())
+                },
+                set: function(component,value){
+                    return component.find('.card-header').html(value);
+                }
+            }
+        ],
         into: function(){
             return wed.editor.insert(this);
         }
@@ -50,6 +63,19 @@ $(function(){
         cid: 'h1',
         name: '一级标题',
         template: '<h1 edit>一级标题</h1>',
+        edit: [
+            {
+                eid: 'text',
+                name: '文字',
+                type: 'text',
+                get: function(component){
+                    return $.trim(component.html())
+                },
+                set: function(component,value){
+                    return component.html(value);
+                }
+            }
+        ],
         into: function(){
             return wed.editor.insert(this);
         }
