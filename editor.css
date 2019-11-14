@@ -1,0 +1,26 @@
+@charset "UTF-8";
+
+add{
+    height: 40px;
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    border-style: dashed;
+    border-color: blue;
+}
+
+add::after{
+    content: "+";
+    font-size: 30px;
+    line-height: 30px;
+}
+
+add:hover{
+    border-color: red;
+}
+
+[edit]:hover{
+    border-style: dashed;
+    border-color: green;
+}
