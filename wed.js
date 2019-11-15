@@ -8,7 +8,7 @@
     var _global;
 
     // 组件列表
-    var comlist = [];
+var comlist = {};
 
     // add对象
     var add_this;
@@ -62,7 +62,7 @@
         template:{
             create: function(cid,template){
                 $('body').append('<script type="text/template" id="template-'+ cid +'"></script>');
-                $('script#template-'+cid).append($(template));
+                $('script#template-'+cid).append($(template).hide());
             }
         },
         edit:{
@@ -71,24 +71,35 @@
                 wed.edit.create();
                 edit_modal.on('click','#save',function(){
                     var form = edit_modal.find('.modal-body');
-                    edit_component.edit.forEach(function(value){
-                        var eid = value.eid;
-                        value.set(edit_this,form.find('[eid="'+eid+'"]').val());
+                    $.each(edit_component.edit,function(eid,edit){
+                        edit.set(edit_this,form.find('[eid="'+eid+'"]').val());
                     })
                     edit_modal.modal('hide');
                     wed.update();
                 })
             },
             update: function(component){
-                component.edit.forEach(function(value){
-                    var form = edit_modal.find('.modal-body');
-                    form.empty();
-                    switch(value.type){
+                var form = edit_modal.find('.modal-body');
+                form.empty();
+                var html = '';
+                $.each(component.edit,function(eid,edit){
+                    switch(edit.type){
                         case 'text':
-                            form.append($('<p>'+ value.name +'</p><input class="form-control" type="text" eid="'+ value.eid + '" value="' + value.get(edit_this) + '"></input>'));
+                            html += '<p>'+ edit.name +'</p><input class="form-control" type="text" eid="'+ eid + '" value="' + edit.get(edit_this) + '"></input>';
+                            break;
+                        case 'select':
+                            html += '<p>' + edit.name +'</p>';
+                            html += '<select class="form-control" eid="'+eid+'">';
+                            $.each(edit.select,function(sid,name){
+                                var check = "";
+                                if(edit.get(edit_this) == sid){check = 'selected'};
+                                html += '<option value="' + sid +'" '+ check +'>'+name+'</option>';
+                            })
+                            html += '</select>';
                             break;
                     }
                 })
+                form.append($(html));
             },
             create: function(){
                 // 创建卡片编辑器弹窗
@@ -132,9 +143,9 @@
                     console.log('group select update');
                     groupselect = $('#groupselect');
                     groupselect.empty();
-                    comlist.forEach(function(group){
+                    $.each(comlist,function(gid,group){
                         groupselect.append('<option value="'+ group.gid + '">' + group.name + '</option>');
-                    })
+                    });
                 },
                 component: function(){
                     console.log('component select update');
@@ -143,9 +154,9 @@
 
                     var group =  wed.get.group(groupselect.val());
                     comselect.empty();
-                    group.component.forEach(function(component){
+                    $.each(group.component,function(cid,component){
                         comselect.append('<option value="'+ component.cid + '">' + component.name + '</option>')
-                    })
+                    });
                 }
             },
             create: function(){
@@ -177,7 +188,7 @@
                 // 绑定事件（为了防止重复绑定）
                 $('body').append($add_modal.html()).off().on('click','#divadd',function(){
                     var component = wed.get.component(groupselect.val(),comselect.val());
-                    component.into(add_this);
+                    component.into(add_this).prev().show(300);
                     $('#add_modal').modal('hide');
                     wed.update();
                 }).on('change','#groupselect',function(){
@@ -194,22 +205,19 @@
                 };
                 component.gid = gid;
                 wed.template.create(component.cid,component.template);
-                comgroup.component.push(component);
+                comgroup.component[component.cid] = component;
             },
             group: function(gid,groupname){
                 // 注册组件组
-                var comgroup = comlist.find(function (value){
-                    return value.name == groupname;
-                })
-                if(comgroup != undefined){
+                if(comlist[groupname] != undefined){
                     return false;
                 }
-                comlist.push({
+                comlist[gid] = {
                     gid: gid,
                     name: groupname,
                     type: 'component',
-                    component: []
-                });
+                    component: {} 
+                };
                 wed.modal.select.group();
                 return true;
             }
@@ -217,18 +225,11 @@
         get: {
             group: function(gid){
                 // 获得指定gid的组件组对象
-                var group = comlist.find(function (value){
-                    return value.gid == gid;
-                })
-                return group;
+                return comlist[gid];
             },
             component: function(gid,cid){
                 // 获得指定组的组件对象
-                var group = wed.get.group(gid);
-                var component = group.component.find(function(value){
-                    return value.cid == cid
-                });
-                return component;
+                return comlist[gid].component[cid];
             },
             componentlist: function(){
                 // 获得组件表对象（仅调试用，开发时尽量不要调用）
