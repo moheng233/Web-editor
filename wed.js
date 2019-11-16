@@ -31,6 +31,7 @@ var comlist = {};
             // 编辑器全局初始化
             wed.modal.init();
             wed.edit.init();
+            //wed.contextmenu.init();
             wed.update();
             console.log('wed.js loaded')
         },
@@ -48,6 +49,11 @@ var comlist = {};
                 wed.edit.update(component);
                 $('#edit_modal').modal();
                 event.stopPropagation();
+            }).on('dragstart',function(e){
+                //console.log(e);
+                //$(this).hide();
+            }).on('dragend',function(e){
+                console.log(e)
             })
         },
         editor:{
@@ -55,14 +61,23 @@ var comlist = {};
             insert: function(component){
                 // 往add对象前插入模板
                 template = $('script#template-'+component.cid);
-                template = template.children().clone().attr('data-component',component.cid).attr('data-group',component.gid);
+                var date_id = wed.get.rand();
+                template = template
+                    .children()
+                    .clone()
+                    .attr('data-component',component.cid)
+                    .attr('data-group',component.gid)
+                    .attr('date-id',date_id)
+                    .find('*')
+                    .attr('date-id',date_id)
+                    .end();
                 return add_this.before(template);
             }
         },
         template:{
             create: function(cid,template){
                 $('body').append('<script type="text/template" id="template-'+ cid +'"></script>');
-                $('script#template-'+cid).append($(template).hide());
+                $('script#template-'+cid).append($(template).hide().attr('draggable','true'));
             }
         },
         edit:{
@@ -235,14 +250,25 @@ var comlist = {};
                 // 获得组件表对象（仅调试用，开发时尽量不要调用）
                 return comlist;
             },
-            rand: function(n) {
+            rand: function() {
                 // 生成随机数
                 var str = 'ABCDEFGHJKMNPQRSTWXYZabcdefhijkmnprstwxyz2345678';
                 var r = '';
-                for (var i = 0; i < n; i++) {
+                for (var i = 0; i < 5; i++) {
                     r += str.charAt(Math.floor(Math.random() * str.length));
                 }
                 return r;
+            }
+        },
+        contextmenu :{
+            init: function(){
+                $.contextMenu({
+                    selector: '[edit]',
+                    items: {
+                        "edit": {name: "编辑",icon: "fa-edit"},
+                        "delete": {name: "删除",icon: "fa-trash"}
+                    }
+                })
             }
         }
     }

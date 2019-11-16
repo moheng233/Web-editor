@@ -20,10 +20,10 @@ $(function(){
                 name: '卡片头部标题',
                 type: 'text',
                 get: function(component){
-                    return $.trim(component.find('.card-header').html())
+                    return $.trim(component.find('.card-header,[date-id="'+component.attr('date-id')+'"]').html())
                 },
                 set: function(component,value){
-                    return component.find('.card-header').html(value);
+                    return component.find('.card-header,[date-id="'+component.attr('date-id')+'"]').html(value);
                 }
             }
         },
